@@ -395,10 +395,18 @@ function palicanon_load() {
 						$("#article_author").html(result.username.nickname + "@" + result.username.username);
 						$("#contents").html(note_init(result.content));
 						note_refresh_new(function () {
-							document.querySelector("#para_focus").scrollIntoView({
-								block: "end",
-								behavior: "smooth",
-							});
+                            if(document.querySelector("#para_focus")){
+                                document.querySelector("#para_focus").scrollIntoView({
+                                    block: "end",
+                                    behavior: "smooth",
+                                });                                
+                            }
+
+                            $.get('templiates/glossary.tpl',function(data){
+                                let TermData = term_get_used();
+                                let rendered = Mustache.render(data,TermData);
+                                $("#glossary").html(rendered);                                
+                            });
 						});
 						reader_draw_para_menu();
 						guide_init();
@@ -514,7 +522,19 @@ function render_toc(){
 					nextChapter = it.next_chapter;
 					prevChapter = it.prev_chapter;
 				}
-				arrToc.push({article:it.paragraph,title:it.toc,level:it.level});
+                let strTitle;
+                switch (getCookie('language')) {
+                    case 'my':
+                        strTitle = roman_to_my(it.toc);
+                        break;
+                    case 'si':
+                        strTitle = roman_to_si(it.toc);
+                        break;
+                    default:
+                        strTitle = it.toc;
+                        break;
+                }
+				arrToc.push({article:it.paragraph,title:strTitle,title_roman:it.toc,level:it.level});
 			}
 			$("#toc_content").fancytree({
 				autoScroll: true,
