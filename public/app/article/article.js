@@ -162,7 +162,12 @@ function articleFillFootNavButton(article_list,curr_article){
 				$("#contents_nav_left_inner").html("无");
 			}
 			if(index!=article_list.length-1){
-				$("#contents_nav_right_inner").html(article_list[index+1].title);
+                if(article_list[index+1].title==""){
+                    $("#contents_nav_right_inner").html("[unnamed]");
+                }else{
+                    $("#contents_nav_right_inner").html(article_list[index+1].title);
+                }
+				
 				nextArticle = article_list[index+1].article;
 			}else{
 				$("#contents_nav_right_inner").html("无");
@@ -357,6 +362,23 @@ function gotoArticle(articleId) {
 	location.assign(url);
 }
 
+function OneHitChapter(book,para,channel){
+    fetch('/api/v2/view',{
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            target_type:'chapter',
+            book:book,
+            para:para,
+            channel:channel
+        })
+    })
+  .then(response => response.json())
+  .then(data => console.log(data));
+}
 
 function palicanon_load() {
 	let param;
@@ -371,6 +393,13 @@ function palicanon_load() {
 				start: _start,
 				end: _end,
 			}
+            if(_channal !== ""){
+				param.channel = _channal;
+                for (const iterator of _channal.split(",")) {
+					//增加点击次数
+                    OneHitChapter(_book,_par,iterator);
+                }
+            }
 			break;
 		case "simsent":
 		case "sim":
@@ -387,12 +416,20 @@ function palicanon_load() {
 				try {
 					let result = JSON.parse(data);
 					if (result) {
+						if(result.debug){
+							console.log("debug:",result.debug);
+						}
 						_sent_data=result;
-						$("#article_title").html(result.title);
+                        if(result.title==""){
+                            $("#article_title").html("[unnamed]");
+                        }else{
+                            $("#article_title").html(result.title);
+                        }
 						$("#article_path_title").html(result.title);
 						$("#page_title").text(result.title);
 						$("#article_subtitle").html(result.subtitle);
-						$("#article_author").html(result.username.nickname + "@" + result.username.username);
+						//$("#article_author").html(result.username.nickname + "@" + result.username.username);
+                        console.log("content:",result.content);
 						$("#contents").html(note_init(result.content));
 						note_refresh_new(function () {
                             if(document.querySelector("#para_focus")){
@@ -435,8 +472,14 @@ function reader_get_path() {
 			let suttaTitle = $("chapter").last().html();
 
 			$("#pali_pedia").html(bookTitle);
-			$("#article_title").html(suttaTitle);
-			$("#page_title").text(suttaTitle);
+            if(suttaTitle==""){
+                $("#article_title").html("[unnamed]");
+                $("#page_title").text("[unnamed]");
+            }else{
+                $("#article_title").html(suttaTitle);
+                $("#page_title").text(suttaTitle);
+            }
+            note_ref_init('_self');
 		}
 	);
 }
@@ -448,7 +491,7 @@ function reader_draw_para_menu() {
 		let html = "<a name='para_" + strPara + "'></a>";
 		html += "<div class='case_dropdown-content para_menu'>";
 		if (typeof _view != "undefined" && _view != "para") {
-			html += "<a onclick=\"junp_to_para('" + _book + "','" + strPara + "')\">仅显示此段</a>";
+			html += "<a onclick=\"junp_to_para('" + _book + "','" + strPara + "')\">" + gLocal.gui.show_this_para_only + "</a>";
 		}
 		html += "<a onclick=\"edit_wbw('" + _book + "','" + strPara + "')\">" + gLocal.gui.edit_now + "</a>";
 		html += "<a  onclick='goto_nissaya(" + _book + "," + strPara + ")'>" + gLocal.gui.show_nissaya + "</a>";
@@ -523,17 +566,22 @@ function render_toc(){
 					prevChapter = it.prev_chapter;
 				}
                 let strTitle;
-                switch (getCookie('language')) {
-                    case 'my':
-                        strTitle = roman_to_my(it.toc);
-                        break;
-                    case 'si':
-                        strTitle = roman_to_si(it.toc);
-                        break;
-                    default:
-                        strTitle = it.toc;
-                        break;
+                if(it.toc==""){
+                    strTitle  = "[unnamed]";
+                }else{
+                    switch (getCookie('language')) {
+                        case 'my':
+                            strTitle = roman_to_my(it.toc);
+                            break;
+                        case 'si':
+                            strTitle = roman_to_si(it.toc);
+                            break;
+                        default:
+                            strTitle = it.toc;
+                            break;
+                    }                    
                 }
+
 				arrToc.push({article:it.paragraph,title:strTitle,title_roman:it.toc,level:it.level});
 			}
 			$("#toc_content").fancytree({
@@ -583,7 +631,12 @@ function fill_chapter_nav(){
 				par: prevChapter,
 			}
 		).done(function (data) {
-			$("#contents_nav_left_inner").html(data.data.toc);
+            if(data.data.toc==""){
+                $("#contents_nav_left_inner").html("[unnamed]");
+            }else{
+                $("#contents_nav_left_inner").html(data.data.toc);
+            }
+			
 		});		
 	}else{
 		$("#contents_nav_left_inner").html("无");
@@ -598,7 +651,12 @@ function fill_chapter_nav(){
 				par: nextChapter,
 			}
 		).done(function (data) {
-			$("#contents_nav_right_inner").html(data.data.toc);
+            if(data.data.toc==""){
+                $("#contents_nav_right_inner").html("[unnamed]");
+            }else{
+                $("#contents_nav_right_inner").html(data.data.toc);
+            }
+			
 		});		
 	}else{
 		$("#contents_nav_right_inner").html("无");
@@ -647,4 +705,15 @@ function gotoPara(paragraph) {
 		url += "&direction=" + _direction;
 	}
 	location.assign(url);
+}
+
+function show_channel_detail_pannal(){
+	if($("#right_pannal").css("display")=="none"){
+		$("#right_pannal").show();
+		$(".contents_div").css("width","70%");
+	}else{
+		$("#right_pannal").hide();
+		$(".contents_div").css("width","100%");		
+	}
+
 }

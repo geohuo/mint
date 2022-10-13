@@ -670,7 +670,8 @@ pw {
 	overflow-wrap: anywhere;
 }
 .preview {
-	font-size: 110%;
+	/*font-size: 110%;*/
+    line-height: 150%;
     width: -webkit-fill-available;
 }
 .preview::first-letter {
@@ -680,7 +681,7 @@ pw {
 	text-transform:capitalize;
 }
 .compact .body > .head_bar {
-	display: flex;
+	/*display: flex;*/
 }
 .compact .body > .head_bar > .date {
 	display: none;
@@ -729,14 +730,14 @@ pw {
 }
 .commentary .tool_bar > .right{
     /*left: 8em;*/
-    width: 8em;
+    width: fit-content;
 }
 .translation>.sent_tran_inner>.tool_bar > .right{
     right: 2em;
 }
 
 .sent_tran_inner:hover > .tool_bar > .right {
-	/*display: block;*/
+	display: block;
 }
 .list_with_head:hover > .tool_bar > .right {
 	display: block;
@@ -750,6 +751,15 @@ pw {
     left:6.2em;
     margin-top: calc(-2.1em - 8px);
 }
+
+.translation>.sent_tran_inner:hover>.tool_bar > .right {
+    display: block;
+}
+.nissaya>.sent_tran_inner:hover>.tool_bar > .right {
+    display: block;
+}
+
+
 .sent_tran.commentary>.sent_tran_inner{
     padding-top: 2.2em;
 }
@@ -781,6 +791,7 @@ pw {
 .compact .foot_bar {
 	display: none;
 }
+
 .edit_mode {
 	background-color: #fafafa;
 }
@@ -793,17 +804,7 @@ pw {
 .pop_menu {
 	display: flex;
 }
-.tag_list {
-	display: flex;
-	list-style-type: none;
-}
-.tag_list li {
-	border-radius: 6px;
-	margin-right: 5px;
-	background-color: var(--bookx);
-	padding: 2px 5px;
-	cursor: pointer;
-}
+
 li.active {
 	background-color: var(--booka);
 }
@@ -813,7 +814,7 @@ li.active {
 .sent_tran .preview p {
 	line-height: normal;
 	margin: 0;
-	font-family: "Noto Sans", "Noto Sans", "Noto Sans SC", "Noto Sans TC", "Padauk", "ATaiThamKHNewV3-Normal", "Arial",
+	font-family: "Noto Sans", "Noto Sans", "Noto Sans SC", "Noto Sans TC", "Noto Sans Myanmar", "ATaiThamKHNewV3-Normal", "Arial",
 		"Verdana";
 }
 .pop_menu .icon {
@@ -916,7 +917,10 @@ w:hover {
 .sent_mode .note_shell {
 	display: block;
 }
-.sent_tran p {
+.preview p:first-child {
+	display: inline;
+}
+.sent_tran p:first-child {
 	display: inline;
 }
 .sent_tran li {
@@ -963,6 +967,20 @@ span.sent_tran {
 	list-style-type: unset;
 	margin-left: 1em;
 }
+
+.tag_list {
+	display: flex;
+	list-style-type: none;
+}
+.tag_list li {
+	border-radius: 6px;
+	margin-right: 5px;
+	background-color: var(--bookx);
+	padding: 2px 5px;
+	cursor: pointer;
+	list-style: none;
+}
+
 .icon_sent_status {
 	display: none;
 	width: 22px;
@@ -1036,6 +1054,15 @@ pali>p {
 
 .para_mode .palitext{
 	text-indent: 2em;
+}
+.para_mode li .palitext{
+	text-indent: -1em;
+}
+
+ul {
+    margin-block-start: 0.5em;
+    margin-block-end: 0.5em;
+    margin-left: 18px;
 }
 
 .sent_mode>div>p {
@@ -1129,17 +1156,56 @@ pali>p {
 .preview .nissaya{
     display:inline;
 }
-.preview .nissaya .nsy_word{
+
+.nsy_word{
+    display:inline;
     padding-right:10px;
+    color: var(--main-color);
 }
-.preview .nissaya .nsy_word .org{
+
+.nsy_word>.org{
     display:inline;
-    font-weight: 700;
+    font-weight: 600;
+    padding-right: 0.5em;
+    font-size: unset;
 }
-.preview .nissaya .nsy_word .meaning{
+.nsy_word>.meaning{
     display:inline;
-    font-weight: 500;
+    font-weight: 400;
+	white-space: pre-wrap;
+}
+.nsy_word>.org>strong {
+    font-weight:900;
+}
+
+
+.nsy_word>.meaning>.grammar_tag{
+    background: unset;
 }
 span.sent_tran::first-letter {
     text-transform: capitalize;
+}
+
+guide.grammar_tag {
+    display: unset;
+    background: unset;
+    background-color: var(--btn-color);
+    padding: 0;
+    border-radius: 3px;
+	margin: 0;
+
+}
+guide.grammar_tag:hover {
+	text-decoration: underline;
+}
+
+button.primary {
+    padding: 6px 32px;
+    background-color: var(--link-hover-color);
+    color: var(--btn-hover-color);
+    border-radius: 5px;
+}
+
+.vertical .preview .popup_contence{
+    max-width: max(50vw, 100%);
 }

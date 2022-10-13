@@ -1,9 +1,11 @@
-import { Affix, Layout, Menu, Breadcrumb, Table, Tag, Space, Pagination, message, notification, Anchor } from "antd";
+import React from 'react';
+import { Affix, Layout, Menu, Breadcrumb, Table, Tag, Space, Pagination, message, notification, Anchor,List, Avatar } from "antd";
 import { Row, Col } from "antd";
 import { UserOutlined, LaptopOutlined, NotificationOutlined } from "@ant-design/icons";
 import { Footer } from "antd/lib/layout/layout";
 import { useState } from 'react';
 import { WidgetCommitNofifiction } from '@/components/demo'
+import { MessageOutlined, LikeOutlined, StarOutlined } from '@ant-design/icons';
 
 
 const { SubMenu } = Menu;
@@ -13,64 +15,41 @@ const { Link } = Anchor;
 message.config({
 	maxCount: 4
 });
-//表数据
-const dataSource = [
-	{
-		key: '1',
-		name: 'name1',
-		age: 32,
-		adress: "西湖南路"
-	},
-	{
-		key: '2',
-		name: 'name2',
-		age: 34,
-		adress: '西湖公园'
-	},
-	{
-		key: '3',
-		name: 'name1',
-		age: 32,
-		adress: "西湖南路"
-	},
-	{
-		key: '4',
-		name: 'name2',
-		age: 34,
-		adress: '西湖公园'
-	},
-	{
-		key: '5',
-		name: 'name1',
-		age: 32,
-		adress: "西湖南路"
-	},
-	{
-		key: '6',
-		name: 'name2',
-		age: 34,
-		adress: '西湖公园'
-	}
-]
-//表头
-const columns = [
-	{
-		title: 'Id',
-		dataIndex: 'id',
-		key: 'id',
-		render: text => <a>{text}</a>,
-	},
-	{
-		title: 'user_id',
-		dataIndex: 'user_id',
-		key: 'user_id',
-	},
-	{
-		title: "title",
-		dataIndex: 'title',
-		key: 'title',
-	}
-]
+
+const data = [
+  {
+    title: '梵网经',
+  },
+  {
+    title: '沙门果经',
+  },
+  {
+    title: '盐块经',
+  },
+  {
+    title: '根修习经',
+  },
+];
+
+const listData = [];
+for (let i = 0; i < 23; i++) {
+  listData.push({
+    href: 'https://ant.design',
+    title: `ant design part ${i}`,
+    avatar: 'https://joeschmoe.io/api/v1/random',
+    description:
+      'Ant Design, a design language for background applications, is refined by Ant UED Team.',
+    content:
+      'We supply a series of design principles, practical patterns and high quality design resources (Sketch and Axure), to help people create their product prototypes beautifully and efficiently.',
+  });
+}
+
+const IconText = ({ icon, text }) => (
+  <Space>
+    {React.createElement(icon)}
+    {text}
+  </Space>
+);
 
 function handleClick(e) {
 	console.log('click', e);
@@ -101,15 +80,25 @@ export default () => {
 	const [tableData, setTableData] = useState();
 
 
-	function getTableData(){
-		fetch('https://gorest.co.in/public-api/posts')
+	function getTableData(e){
+        //let url='https://gorest.co.in/public-api/posts';
+        let url='http://127.0.0.1:8000/api/v2/progress?view=tag';
+		fetch(url)
 			.then(function (response) {
 				console.log("ajex:", response);
 				return response.json();
 			})
 			.then(function (myJson) {
 				console.log("ajex",myJson.data);
-				setTableData(myJson.data);
+                for (let iterator of myJson.data.rows) {
+                    if(iterator.title==''){
+                        iterator.title = iterator.toc;
+                    }
+                    iterator.description = iterator.toc;
+                    iterator.href="http://127.0.0.1:8000/app/article/?view=chapter&book="+iterator.book+"&par="+iterator.para+'&channel='+iterator.channel_id;
+                    iterator.avatar = 'https://joeschmoe.io/api/v1/random';
+                }
+				setTableData(myJson.data.rows);
 			});		
 	}
 	function pageChange(page: number, pagesize?: number | undefined) {
@@ -125,14 +114,15 @@ export default () => {
 			<Header className="header">
 				<div className="logo" />
 
-				<Menu onClick={handleClick} theme="dark" mode="horizontal" defaultSelectedKeys={['2']}>
+				<Menu onClick={handleClick} theme="dark" mode="horizontal" defaultSelectedKeys={['1']}>
 					<Menu.Item key="0">
 						<WidgetCommitNofifiction time={commitTime} message={commitMsg} successful={commitStatus} />
 					</Menu.Item>
-					<Menu.Item key="1" onClick={getTableData}>Palicanon</Menu.Item>
-					<Menu.Item key="2">Course</Menu.Item>
-					<Menu.Item key="3">nav 3</Menu.Item>
-					<SubMenu key="submenu" icon={<UserOutlined />} title="Others">
+					<Menu.Item key="1" >圣典</Menu.Item>
+					<Menu.Item key="2">课程</Menu.Item>
+					<Menu.Item key="3">字典</Menu.Item>
+					<Menu.Item key="3">文集</Menu.Item>
+					<SubMenu key="submenu" icon={<UserOutlined />} title="更多">
 						<Menu.ItemGroup title="group1">
 							<Menu.Item key="4">option1</Menu.Item>
 							<Menu.Item key="5">option2</Menu.Item>
@@ -148,24 +138,47 @@ export default () => {
 			</Header>
 			<Layout>
 				<Affix offsetTop={top}>
-					<Sider className="site-layout-background">
+					<Sider 
+                        className="site-layout-background"
+                        breakpoint="lg"
+                        collapsedWidth="0"
+                        onBreakpoint={broken => {
+                            console.log(broken);
+                        }}
+                        onCollapse={(collapsed, type) => {
+                            console.log(collapsed, type);
+                        }}
+                    >
 						<Menu
 							mode="inline"
 							defaultSelectedKeys={['1']}
 							defaultOpenKeys={['sub1']}
 							style={{ height: '100%', borderRight: 0 }}
+                            onClick={getTableData}
 						>
-							<SubMenu key="sub1" icon={<UserOutlined />} title="subnav 1">
-								<Menu.Item key="1">option1</Menu.Item>
-								<Menu.Item key="2">option2</Menu.Item>
-								<Menu.Item key="3">option3</Menu.Item>
-								<Menu.Item key="4">option4</Menu.Item>
+							<SubMenu key="sutta" icon={<UserOutlined />} title="经藏">
+								<Menu.Item key="dn">长部</Menu.Item>
+								<Menu.Item key="mn">中部</Menu.Item>
+								<Menu.Item key="sn">相应部</Menu.Item>
+								<Menu.Item key="an">增支部</Menu.Item>
+								<Menu.Item key="kn">小部</Menu.Item>
 							</SubMenu>
-							<SubMenu key="sub2" icon={<UserOutlined />} title="subnav 2">
-								<Menu.Item key="5">option1</Menu.Item>
-								<Menu.Item key="6">option2</Menu.Item>
-								<Menu.Item key="7">option3</Menu.Item>
-								<Menu.Item key="8">option4</Menu.Item>
+							<SubMenu key="vinaya" icon={<UserOutlined />} title="律藏">
+								<Menu.Item key="6">分别</Menu.Item>
+								<Menu.Item key="7">篇章</Menu.Item>
+								<Menu.Item key="8">附录</Menu.Item>
+							</SubMenu>
+							<SubMenu key="abhidhamma" icon={<UserOutlined />} title="阿毗达摩藏">
+								<Menu.Item key="9">法集论</Menu.Item>
+								<Menu.Item key="10">option2</Menu.Item>
+								<Menu.Item key="11">option3</Menu.Item>
+								<Menu.Item key="12">option4</Menu.Item>
+							</SubMenu>
+							<SubMenu key="others" icon={<UserOutlined />} title="其他">
+								<Menu.Item key="9">法集论</Menu.Item>
+								<Menu.Item key="10">option2</Menu.Item>
+								<Menu.Item key="11">option3</Menu.Item>
+								<Menu.Item key="12">option4</Menu.Item>
 							</SubMenu>
 						</Menu>
 					</Sider>
@@ -173,9 +186,10 @@ export default () => {
 
 				<Layout style={{ padding: '0 24px 24px' }}>
 					<Breadcrumb style={{ padding: '0 24px 24px' }}>
-						<Breadcrumb.Item>Home</Breadcrumb.Item>
-						<Breadcrumb.Item>List</Breadcrumb.Item>
-						<Breadcrumb.Item>App</Breadcrumb.Item>
+						<Breadcrumb.Item>全部</Breadcrumb.Item>
+						<Breadcrumb.Item>经藏</Breadcrumb.Item>
+						<Breadcrumb.Item>长部</Breadcrumb.Item>
+						<Breadcrumb.Item>……</Breadcrumb.Item>
 					</Breadcrumb>
 					<Content
 						className="site-layout-background"
@@ -186,19 +200,61 @@ export default () => {
 							width: "100%",
 							overflowX: "auto",
 						}}>
-						<Table dataSource={tableData} columns={columns} />
-						<div>搜索结果</div>
-						<Pagination defaultCurrent={1} total={54} onChange={pageChange} />
+<List
+    itemLayout="vertical"
+    size="large"
+    pagination={{
+      onChange: page => {
+        console.log(page);
+      },
+      pageSize: 10,
+    }}
+    dataSource={tableData}
+    footer={
+      <div>
+        <b>ant design</b> footer part
+      </div>
+    }
+    renderItem={item => (
+      <List.Item
+        key={item.title}
+        actions={[
+          <IconText icon={StarOutlined} text={item.progress} key="list-vertical-star-o" />,
+          <IconText icon={LikeOutlined} text={item.created_at} key="list-vertical-like-o" />,
+          <IconText icon={MessageOutlined} text="2" key="list-vertical-message" />,
+        ]}
+
+      >
+        <List.Item.Meta
+          avatar={<Avatar src={item.avatar} />}
+          title={<a href={item.href} target='_blank'>{item.title}</a>}
+          description={item.description}
+        />
+      </List.Item>
+    )}
+  />
 					</Content>
 				</Layout>
 				<Affix offsetTop={top}>
-					<Sider>
-						<Anchor>
-							<Link href="#aa" title="aa" />
-							<Link href="#bb" title="bb" />
-							<Link href="#cc" title="cc" />
-							<Link href="#dd" title="dd" />
-						</Anchor>
+					<Sider
+                    className="site-layout-background"
+                        breakpoint="lg"
+                        collapsedWidth="0"
+                    >
+<List
+    header={<div>本周最新</div>}
+    itemLayout="horizontal"
+    dataSource={data}
+    renderItem={item => (
+      <List.Item>
+        <List.Item.Meta
+          avatar={<Avatar src="https://joeschmoe.io/api/v1/random" />}
+          title={<a href="https://ant.design">{item.title}</a>}
+          description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+        />
+      </List.Item>
+    )}
+  />
 					</Sider>
 				</Affix>
 			</Layout>

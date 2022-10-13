@@ -137,7 +137,7 @@ var list_relation=[
     {
         "id": "NIO",
         "case": ".nom.",
-        "note": "被描述 ➡ 定性<br>XX有…",
+        "note": "被描述(主) ➡ 定性(表)<br>XX即……",
         "sys_name": "Sadda Pan Goun",
         "author": "Ven. Pandita Pariyatti Faculty ITBMU",
         "editor": "Bhikkhu Kosalla sy1987",
@@ -164,7 +164,7 @@ var list_relation=[
     {
         "id": "NID",
         "case": ".nom.",
-        "note": "待命名 ➡ 命名<br>XX叫做…",
+        "note": "待命名(主) ➡ 命名(表)<br>XX叫做…",
         "sys_name": "Sadda Pan Goun",
         "author": "Ven. Pandita Pariyatti Faculty ITBMU",
         "editor": "Bhikkhu Kosalla sy1987",
@@ -1082,11 +1082,20 @@ var list_relation=[
     {
         "id": "ADV",
         "case": ".abs.",
-        "note": "副词",
+        "note": "先动-后动",
         "sys_name": "Sadda Pan Goun",
         "author": "Ven. Pandita Pariyatti Faculty ITBMU",
         "editor": "Bhikkhu Kosalla sy1987",
-        "language": "zh-cn"
+        "language": "zh ➡ cn"
+    },
+    {
+        "id": "ADV",
+        "case": ".ger.",
+        "note": "先动-后动",
+        "sys_name": "Sadda Pan Goun",
+        "author": "Ven. Pandita Pariyatti Faculty ITBMU",
+        "editor": "Bhikkhu Kosalla sy1987",
+        "language": "zh ➡ cn"
     },
     {
         "id": "ADV",
@@ -1118,7 +1127,34 @@ var list_relation=[
     {
         "id": "CAU",
         "case": ".abs.",
+        "note": "hetu ➡ phala",
+        "sys_name": "Sadda Pan Goun",
+        "author": "Ven. Pandita Pariyatti Faculty ITBMU",
+        "editor": "Bhikkhu Kosalla sy1987",
+        "language": "default"
+    },
+    {
+        "id": "CAU",
+        "case": ".ger.",
         "note": "Causality Relation",
+        "sys_name": "Sadda Pan Goun",
+        "author": "Ven. Pandita Pariyatti Faculty ITBMU",
+        "editor": "Bhikkhu Kosalla sy1987",
+        "language": "en"
+    },
+    {
+        "id": "CAU",
+        "case": ".ger.",
+        "note": "因 ➡ 果",
+        "sys_name": "Sadda Pan Goun",
+        "author": "Ven. Pandita Pariyatti Faculty ITBMU",
+        "editor": "Bhikkhu Kosalla sy1987",
+        "language": "zh-cn"
+    },
+    {
+        "id": "CAU",
+        "case": ".ger.",
+        "note": "hetu ➡ phala",
         "sys_name": "Sadda Pan Goun",
         "author": "Ven. Pandita Pariyatti Faculty ITBMU",
         "editor": "Bhikkhu Kosalla sy1987",
@@ -1396,7 +1432,7 @@ var list_relation=[
     },
     {
         "id": "ENU",
-        "case": ".adv.",
+        "case": "",
         "note": "enumerative relation",
         "sys_name": "Sadda Pan Goun",
         "author": "Ven. Pandita Pariyatti Faculty ITBMU",
@@ -1405,7 +1441,7 @@ var list_relation=[
     },
     {
         "id": "ENU",
-        "case": ".adv.",
+        "case": "",
         "note": "罗列 ➡ 破折号",
         "sys_name": "Sadda Pan Goun",
         "author": "Ven. Pandita Pariyatti Faculty ITBMU",
@@ -1414,7 +1450,7 @@ var list_relation=[
     },
     {
         "id": "ENU",
-        "case": ".adv.",
+        "case": "",
         "note": "enumerative relation",
         "sys_name": "Sadda Pan Goun",
         "author": "Ven. Pandita Pariyatti Faculty ITBMU",

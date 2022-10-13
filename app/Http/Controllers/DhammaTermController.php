@@ -6,6 +6,7 @@ use App\Models\DhammaTerm;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class DhammaTermController extends Controller
 {
@@ -20,6 +21,9 @@ class DhammaTermController extends Controller
 		$indexCol = ['id','guid','word','word_en','meaning','other_meaning','note','language','channal','updated_at'];
 
 		switch ($request->get('view')) {
+            case 'show':
+                return $this->ok(DhammaTerm::find($request->get('id')));
+                break;
 			case 'user':
 				# code...
                 $userUid = $_COOKIE['user_uid'];
@@ -51,6 +55,7 @@ class DhammaTermController extends Controller
 									->where('word', $request->get("word"))
 									->orderBy('created_at','desc')
 									->get();
+                $count = count($result);
 				break;
             case 'hot-meaning':
                 $key='term/hot_meaning';
@@ -164,6 +169,7 @@ class DhammaTermController extends Controller
     public function show(DhammaTerm $dhammaTerm)
     {
         //
+        return $dhammaTerm;
     }
 
     /**

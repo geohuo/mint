@@ -30,6 +30,10 @@ if (isset($_GET["begin"])) {
 if (isset($_GET["end"])) {
     $_end = $_GET["end"];
 }
+if (isset($_GET["channel"])) {
+    $_channel = $_GET["channel"];
+}
+
 $_view = $_GET["view"];
 
 $output["toc"] = array();
@@ -43,6 +47,12 @@ $output["content"]="";
 $output["owner"]="";
 $output["username"]=array("username"=>"","nickname"=>"");
 $output["status"]="";
+$output["debug"]='';
+
+
+$dns = _FILE_DB_PALI_TOC_;
+$dbh_toc = new PDO($dns, _DB_USERNAME_, _DB_PASSWORD_, array(PDO::ATTR_PERSISTENT => true));
+$dbh_toc->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 if ($_view == "sent") {
     $output["content"] = "{{". $_book . "-" . $_para . "-". $_start . "-" . $_end . "}}";
@@ -77,7 +87,7 @@ $paraBegin=0;
 $paraEnd=0;
 
 PDO_Connect(_FILE_DB_PALITEXT_);
-$query = "SELECT level , parent, chapter_len,chapter_strlen FROM "._TABLE_PALI_TEXT_."  WHERE book= ? AND paragraph= ?";
+$query = "SELECT level , parent, chapter_len,chapter_strlen FROM "._TABLE_PALI_TEXT_."  WHERE book= ? AND paragraph= ?  order by paragraph asc";
 $FetchParInfo = PDO_FetchRow($query, array($_book, $_para));
 if ($FetchParInfo) {
     switch ($_view) {
@@ -92,7 +102,7 @@ if ($FetchParInfo) {
             else{
 				#不是标题，加载所在段落
 				$paraBegin = $FetchParInfo["parent"];
-				$query = "SELECT  level , parent, chapter_len,chapter_strlen FROM "._TABLE_PALI_TEXT_."  WHERE book= ? AND paragraph= ?";
+				$query = "SELECT  level , parent, chapter_len,chapter_strlen FROM "._TABLE_PALI_TEXT_."  WHERE book= ? AND paragraph= ?  order by paragraph asc";
 				$FetchParInfo = PDO_FetchRow($query, array($_book, $paraBegin));
             	$paraEnd = $paraBegin + $FetchParInfo["chapter_len"] - 1;
 			}
@@ -110,42 +120,85 @@ if ($FetchParInfo) {
     }
 
     //获取下级目录
-    $query = "SELECT level,paragraph,toc FROM "._TABLE_PALI_TEXT_."  WHERE book= ? AND (paragraph BETWEEN ?AND ? ) AND level < 8 ";
+    $query = "SELECT level,paragraph,toc FROM "._TABLE_PALI_TEXT_."  WHERE book= ? AND (paragraph BETWEEN ?AND ? ) AND level < 8 order by paragraph asc";
     $toc = PDO_FetchAll($query, array($_book, $paraBegin, $paraEnd));
 	if(count($toc)>0){
 		$output["title"] = $toc[0]["toc"];
 	}
 
+    /*
+    目录
+    */
+	if(isset($_channel)){
+		$firstChannel = explode(',',$_channel)[0];
+	}
+    $sTocOutput = "\n\n";
 	if(count($toc)>1){
 		$currLevel = $toc[0]["level"];
 		$ulLevel = 0;
+        $minLevel = 8;
+        foreach ($toc as $key => $value) {
+            if($value["level"] < $minLevel ){
+                $minLevel = $value["level"];
+            }
+        }
 		foreach ($toc as $key => $value) {
 			# code...
+            if(empty($value["toc"])){
+                $sToc = "unnamed";
+            }else{
+                $sToc = $value["toc"];
+            }
+            $sToc = str_replace(['[',']'],[' [','] '],$sToc);
 			if($value["level"] > $currLevel  ){
 				$ulLevel++;
 			}
 			else if($value["level"] < $currLevel ){
-				$ulLevel--;		
+				$ulLevel--;
 			}
 			$currLevel = $value["level"];
-			for ($i=0; $i < $ulLevel; $i++) { 
+            $space = "";
+			for ($i=$minLevel; $i < $currLevel; $i++) { 
 				# code...
-				$output["content"] .= "    ";
+				$space .= "  ";
 			}
-			$output["content"] .= "- [{$value["toc"]}](../article/index.php?view=chapter&book={$_book}&par={$value["paragraph"]})\n";
+			//目录进度
+			$progress = "";
+			$urlChannel = "";
+			if(isset($firstChannel)){
+				$query = "SELECT title , progress FROM "._TABLE_PROGRESS_CHAPTER_."  WHERE book= ? AND para= ?  AND channel_id=?";
+				$sth_title = $dbh_toc->prepare($query);
+				$sth_title->execute(array($_book, $value["paragraph"], $firstChannel));
+				$trans_title = $sth_title->fetch(PDO::FETCH_ASSOC);
+				if ($trans_title) {
+					if(!empty($trans_title['title'])){
+						$sToc = $trans_title['title'];
+					}
+					$progress = "＜".sprintf('%d',$trans_title['progress']*100)."%";
+				}
+				$urlChannel = "&channel={$_channel}";
+			}
+			$sToc = str_replace("[[","",$sToc);
+			$sToc = str_replace("]]","",$sToc);
+			$sTocOutput .= $space . "- [{$sToc}](../article/index.php?view=chapter&book={$_book}&par={$value["paragraph"]}{$urlChannel}){$progress}\n";
 		}		
 	}
+	$sTocOutput .= "\n\n";
 
-
+	$output["debug"] .= "chapter_strlen:{$FetchParInfo["chapter_strlen"]}\n";
     if ($FetchParInfo["chapter_strlen"] > _MAX_CHAPTER_LEN_ && $_view === "chapter" && count($toc) > 1) {
         #文档过大，只加载目录
+		$output["debug"] .= "文档过大，只加载目录\n";
 		if ($toc[1]["paragraph"] - $_para > 1) {
-            # 中间有间隔
+            # 最高级目录和下一个目录中间有正文层级的段落间隔
+			$output["debug"] .= "最高级目录和下一个目录中间有正文层级的段落间隔\n";
             $paraBegin = $_para;
             $paraEnd = $toc[1]["paragraph"] - 1;
             $output["head"] = 1;
         } else {
             #中间无间隔
+			$output["debug"] .= "最高级目录和下一个目录中间无正文层级的段落间隔\n";
+            $output["content"] .= $sTocOutput;
             echo json_encode($output, JSON_UNESCAPED_UNICODE);
             exit;
         }
@@ -153,7 +206,7 @@ if ($FetchParInfo) {
 
     PDO_Connect(_FILE_DB_PALI_SENTENCE_);
 
-    $query = "SELECT book,paragraph, word_begin as begin, word_end as end FROM "._TABLE_PALI_SENT_." WHERE book= ? AND (paragraph BETWEEN ? AND ? ) ";
+    $query = "SELECT book,paragraph, word_begin as begin, word_end as end FROM "._TABLE_PALI_SENT_." WHERE book= ? AND (paragraph BETWEEN ? AND ? )  order by paragraph,word_begin asc";
     $sent_list = PDO_FetchAll($query, array($_book, $paraBegin, $paraEnd));
 	$iCurrPara=0;
 	$output["sent_list"] = $sent_list;
@@ -179,7 +232,7 @@ if ($FetchParInfo) {
 		$output["content"] .= "{{". $value["book"] . "-" . $value["paragraph"] . "-". $value["begin"] . "-" . $value["end"] . "}}";
 
 	}
-    
+    $output["content"] .= $sTocOutput;
     echo json_encode($output, JSON_UNESCAPED_UNICODE);
 
 } else {

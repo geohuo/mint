@@ -5,6 +5,18 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WbwTemplateController;
 use App\Http\Controllers\DhammaTermController;
 use App\Http\Controllers\SentenceController;
+use App\Http\Controllers\ProgressChapterController;
+use App\Http\Controllers\SentenceInfoController;
+use App\Http\Controllers\SentPrController;
+use App\Http\Controllers\TagController;
+use App\Http\Controllers\ViewController;
+use App\Http\Controllers\LikeController;
+use App\Http\Controllers\SentHistoryController;
+use App\Http\Controllers\PaliTextController;
+use App\Http\Controllers\ChannelController;
+use App\Http\Controllers\UserDictController;
+
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -24,4 +36,17 @@ Route::group(['prefix' => 'v2'],function(){
 	Route::apiResource('wbw_templates',WbwTemplateController::class);
 	Route::apiResource('terms',DhammaTermController::class);
 	Route::apiResource('sentence',SentenceController::class);
+	Route::apiResource('sentpr',SentPrController::class);
+	Route::apiResource('progress',ProgressChapterController::class);
+	Route::apiResource('tag',TagController::class);
+	Route::apiResource('view',ViewController::class);
+
+    Route::delete('like', [LikeController::class, 'delete']);
+    Route::apiResource('like',LikeController::class);
+    Route::apiResource('sent_history',SentHistoryController::class);
+    Route::apiResource('palitext',PaliTextController::class);
+    Route::apiResource('channel',ChannelController::class);
+    Route::delete('userdict', [UserDictController::class, 'delete']);
+    Route::apiResource('userdict',UserDictController::class);
+
 });
